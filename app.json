@@ -1,0 +1,91 @@
+{
+  "expo": {
+    "name": "Chopped",
+    "slug": "expo-recipe-app",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/logo.png",
+    "scheme": "exporecipeapp",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "ios": {
+      "supportsTablet": true,
+      "googleServicesFile": "./GoogleService-Info.plist",
+      "bundleIdentifier": "com.expo.recipe",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "backgroundColor": "#E6F4FE",
+        "foregroundImage": "./assets/images/logo.png",
+        "backgroundImage": "./assets/images/logo.png",
+        "monochromeImage": "./assets/images/logo.png"
+      },
+      "edgeToEdgeEnabled": true,
+      "predictiveBackGestureEnabled": false,
+      "googleServicesFile": "./google-services.json",
+      "package": "expo.recipe",
+      "permissions": []
+    },
+    "web": {
+      "output": "static",
+      "favicon": "./assets/images/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-build-properties",
+        {
+          "ios": {
+            "useFrameworks": "static"
+          }
+        }
+      ],
+      [
+        "expo-font",
+        {
+          "fonts": [
+            "node_modules/@expo-google-fonts/poppins/900Black/Poppins_900Black.ttf",
+            "node_modules/@expo-google-fonts/poppins/700Bold/Poppins_700Bold.ttf",
+            "node_modules/@expo-google-fonts/poppins/400Regular/Poppins_400Regular.ttf",
+            "node_modules/@expo-google-fonts/poppins/500Medium/Poppins_500Medium.ttf",
+            "node_modules/@expo-google-fonts/poppins/600SemiBold/Poppins_600SemiBold.ttf"
+          ]
+        }
+      ],
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/images/logo.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#ffffff",
+          "dark": {
+            "backgroundColor": "#000000"
+          }
+        }
+      ],
+      [
+        "react-native-google-mobile-ads",
+        {
+          "androidAppId": "ca-app-pub-8480940874690777~6922944684", // Your Android AdMob App ID
+          "iosAppId": "ca-app-pub-8480940874690777~2662714593"
+        }
+      ],
+      "expo-font",
+      "react-native-google-mobile-ads"
+    ],
+    "experiments": {
+      "typedRoutes": true,
+      "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "4a23272d-ee42-4332-94b6-2da6f93b7a50"
+      }
+    }
+  }
+}
