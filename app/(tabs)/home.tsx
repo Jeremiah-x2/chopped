@@ -33,7 +33,6 @@ import {
 import HomeRecipes, { HomeRecipesRef } from "@/components/HomeRecipes";
 import useCustomFetchReactQuery from "@/hooks/useCustomFetchReactQuery";
 import { GOOGLE_AD_ANDROID_UNIT_ID } from "@/utils/constants";
-import { useQueryClient } from "@tanstack/react-query";
 import Carousel, {
   ICarouselInstance,
   Pagination,
@@ -50,7 +49,6 @@ export default function Home() {
   const { points, setPoints } = useContext<IPoints>(UserPointsContext);
   const [refreshing, setRefreshing] = useState<boolean>(false);
   const homeRecipesRef = useRef<HomeRecipesRef>(null);
-  const query = useQueryClient();
 
   const {
     data: carouselRecipes,

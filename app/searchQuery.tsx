@@ -1,15 +1,9 @@
 import BottomSheet, { BottomSheetRefProps } from "@/components/BottomSheet";
 // import { RecipeItem } from "@/components/HomeRecipes";
-import useFetchWithReactQuery from "@/hooks/useFetchWithReactQuery";
+import useCustomFetchReactQuery from "@/hooks/useCustomFetchReactQuery";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import React, {
-  useCallback,
-  useContext,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import React, { useCallback, useContext, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -31,16 +25,30 @@ export default function SearchQuery() {
   const ref = useRef<BottomSheetRefProps>(null);
   const searchRef = useRef<TextInput>(null);
   const [searchQueryValue, setSearchQueryValue] = useState<string>("");
+  console.log(searchQueryValue);
+
+  console.log(searchParams);
+
+  const queries: Record<string, string> = { addRecipeInformation: "true" };
+  if (searchParams.query) queries["query"] = searchParams.query as string;
+  if (searchParams.cuisine) queries["cuisine"] = searchParams.cuisine as string;
+  if (searchParams.mealTypes)
+    queries["mealType"] = searchParams.mealTypes as string;
 
   const {
     isLoading,
     data: recipes,
+    error,
     refetch,
-  } = useFetchWithReactQuery({
-    cuisine: (searchParams.cuisine as string)?.split(",") || "",
-    mealType: (searchParams.mealTypes as string)?.split(",") || "",
-    searchQuery: searchParams.query as string,
+  } = useCustomFetchReactQuery({
+    baseUrl: `https://api.spoonacular.com/recipes/complexSearch`,
+    query: {
+      ...queries,
+    },
+    customKey: "recipe-search",
   });
+
+  console.log("Query Recipes", recipes);
 
   const [cuisines, setCuisines] = useState<
     { isSelected: boolean; cuisine: string }[]
@@ -80,9 +88,9 @@ export default function SearchQuery() {
     }
   };
 
-  useEffect(() => {
-    refetch();
-  }, []);
+  // useEffect(() => {
+  //   refetch();
+  // }, []);
 
   const onSetFilters = () => {
     router.setParams({
@@ -96,6 +104,7 @@ export default function SearchQuery() {
         .join(","),
     });
     ref.current?.scrollTo(0);
+    refetch();
   };
 
   const onClearFilters = () => {
@@ -105,6 +114,7 @@ export default function SearchQuery() {
     );
     router.setParams({ cuisine: "", mealTypes: "" });
     ref.current?.scrollTo(0);
+    refetch();
   };
 
   return (
@@ -323,10 +333,10 @@ export default function SearchQuery() {
                 }}
                 onChangeText={(value) => setSearchQueryValue(value)}
                 returnKeyType="done"
-                onSubmitEditing={(e) => {
-                  // setSearchQuery(searchQueryValue);
+                onSubmitEditing={() => {
                   router.setParams({ query: searchQueryValue });
                   setSearchQueryValue("");
+                  refetch();
                 }}
               />
             </View>
@@ -350,9 +360,9 @@ export default function SearchQuery() {
             </View>
           )}
           <View>
-            {recipes && (recipes as any).results && (
+            {recipes && (recipes as any).data.results && (
               <FlatList
-                data={(recipes as any).results}
+                data={(recipes as any).data.results}
                 numColumns={2}
                 contentContainerStyle={{
                   marginTop: 24,
