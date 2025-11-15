@@ -14,7 +14,7 @@ export default function _layout() {
       <Tabs.Screen name="search" options={{ title: "Search" }} />
       <Tabs.Screen
         name="profile"
-        options={{ title: "Grocery", tabBarLabel: "GroceryList" }}
+        options={{ title: "Grocery", tabBarLabel: "Grocery" }}
       />
     </Tabs>
   );

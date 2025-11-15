@@ -1,11 +1,11 @@
-import { api } from "@/convex/_generated/api";
-import { usePaginatedQuery } from "convex/react";
 import { LinearGradient } from "expo-linear-gradient";
 import { useRouter } from "expo-router";
 // import { router } from "expo-router";
+import { UserPointsContext } from "@/app/_layout";
 import { Skeleton } from "moti/skeleton";
-import React from "react";
+import React, { useContext } from "react";
 import {
+  Alert,
   Dimensions,
   Image,
   Pressable,
@@ -19,23 +19,26 @@ import ErrorComponent from "./ErrorComponent";
 
 const { width: PAGE_WIDTH, height } = Dimensions.get("window");
 
-export default function HomeHeroCarousel() {
+interface IHomeHeroCarousel {
+  recipes: any;
+  isLoading: boolean;
+  error: Error | null;
+}
+
+export default function HomeHeroCarousel({
+  recipes,
+  isLoading,
+  error,
+}: IHomeHeroCarousel) {
   const progress = useSharedValue<number>(0);
-  const router = useRouter();
 
-  const { isLoading, results: recipes } = usePaginatedQuery(
-    api.recipes.getRecipesBySearchQuery,
-    {},
-    { initialNumItems: 12 }
-  );
-
-  if (!isLoading && !recipes) return <ErrorComponent />;
+  if (error) return <ErrorComponent />;
 
   return (
     <View>
       <View style={{}}>
         <Carousel
-          data={isLoading ? new Array(3).fill(null) : recipes!}
+          data={isLoading ? new Array(3).fill(null) : recipes.data.recipes!}
           width={PAGE_WIDTH < 600 ? PAGE_WIDTH : 600}
           height={PAGE_WIDTH < 600 ? PAGE_WIDTH / 2 : 300}
           renderItem={({ item, index }) =>
@@ -53,7 +56,7 @@ export default function HomeHeroCarousel() {
         />
         <Pagination.Basic
           progress={progress}
-          data={isLoading ? new Array(3).fill(null) : recipes!}
+          data={isLoading ? new Array(3).fill(null) : recipes.data.recipes!}
           dotStyle={{ backgroundColor: "rgba(0,0,0,0.2)", borderRadius: 50 }}
           size={6}
           activeDotStyle={{ backgroundColor: "orange" }}
@@ -67,9 +70,23 @@ export default function HomeHeroCarousel() {
 function SliderItem({ recipe }: { recipe: any }) {
   const { image, title, id } = recipe;
   const router = useRouter();
+  const { points, setPoints } = useContext(UserPointsContext);
+  const handleToDetails = () => {
+    const requiredPoints = 2;
+    if (points < requiredPoints) {
+      Alert.alert(
+        "Insufficient Points!",
+        "View ad by clicking on the points in the Home Screen to gain points."
+      );
+      return;
+    } else {
+      router.push(`/${id}`);
+      setPoints((prev) => prev - requiredPoints);
+    }
+  };
   return (
     <Pressable
-      onPress={() => router.push(`/${id}`)}
+      onPress={handleToDetails}
       style={[
         {
           width: PAGE_WIDTH,

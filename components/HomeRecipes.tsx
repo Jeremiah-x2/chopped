@@ -1,28 +1,60 @@
-import { api } from "@/convex/_generated/api";
+import { UserPointsContext } from "@/app/_layout";
+import useCustomFetchReactQuery from "@/hooks/useCustomFetchReactQuery";
 import { Ionicons } from "@expo/vector-icons";
-import { usePaginatedQuery } from "convex/react";
+import { QueryObserverResult } from "@tanstack/react-query";
 import { LinearGradient } from "expo-linear-gradient";
 import { router, useRouter } from "expo-router";
 import { Skeleton } from "moti/skeleton";
-import React from "react";
-import { Image, Pressable, StyleSheet, Text, View } from "react-native";
+import React, { useContext, useImperativeHandle } from "react";
+import {
+  ActivityIndicator,
+  Alert,
+  Image,
+  Pressable,
+  StyleSheet,
+  Text,
+  View,
+} from "react-native";
 
-export default function HomeRecipes({
-  reverse = false,
-}: {
-  reverse?: boolean;
-}) {
+export type HomeRecipesProps = { children?: React.ReactNode };
+
+export type HomeRecipesRef = {
+  refetch: () => Promise<QueryObserverResult<unknown, Error>>;
+};
+
+const HomeRecipes = React.forwardRef((_props, ref) => {
   const router = useRouter();
-  const {
-    isLoading,
-    results: recipes,
-    loadMore,
-  } = usePaginatedQuery(
-    api.recipes.getRecipesPaginated,
-    {},
-    { initialNumItems: 12 }
-  );
+  const { points, setPoints } = useContext(UserPointsContext);
 
+  const { isLoading, error, data, refetch } = useCustomFetchReactQuery({
+    customKey: "home-recipes",
+    query: { number: "12", addRecipeInformation: "true" },
+  });
+
+  useImperativeHandle(ref, () => ({ refetch }), []);
+  let recipes: any;
+
+  if (data) {
+    recipes = (data as any).data.recipes;
+  }
+
+  const handleToDetails = (index: number) => {
+    const requiredPoints = 2;
+    if (points < requiredPoints) {
+      Alert.alert(
+        "Insufficient Points!",
+        "View ad by clicking on the points in the Home Screen to gain points."
+      );
+      return;
+    } else {
+      router.push(`/${recipes[index].id}`);
+      setPoints((prev) => prev - requiredPoints);
+    }
+  };
+
+  console.log("Recipes Result from Home Recipes Component", data);
+
+  if (isLoading) return <ActivityIndicator />;
   return (
     <View style={{ gap: 16 }}>
       <View style={{ flexDirection: "row", gap: 8 }}>
@@ -36,7 +68,7 @@ export default function HomeRecipes({
           >
             {recipes[0] && (
               <Pressable
-                onPress={() => router.push(`${recipes[0].id}`)}
+                onPress={() => handleToDetails(0)}
                 style={[{ height: 150 }, styles.customAll]}
               >
                 <View style={styles.heart}>
@@ -62,13 +94,13 @@ export default function HomeRecipes({
           <Skeleton height={200} width={"100%"} colorMode="light" radius={14}>
             {recipes[1] && (
               <Pressable
-                onPress={() => router.push(`${recipes[1].id}`)}
+                onPress={() => handleToDetails(1)}
                 style={[{ height: 200 }, styles.customAll]}
               >
                 <View style={styles.heart}>
                   <Text
                     style={{ color: "white", fontWeight: "500" }}
-                  >{`${recipes[0].aggregateLikes}`}</Text>
+                  >{`${recipes[1].aggregateLikes}`}</Text>
                   <Ionicons name="heart" size={14} color={"white"} />
                 </View>
                 <Image
@@ -88,13 +120,13 @@ export default function HomeRecipes({
           <Skeleton height={200} width={"100%"} colorMode="light" radius={14}>
             {recipes[2] && (
               <Pressable
-                onPress={() => router.push(`${recipes[2].id}`)}
+                onPress={() => handleToDetails(2)}
                 style={[{ height: 200 }, styles.customAll]}
               >
                 <View style={styles.heart}>
                   <Text
                     style={{ color: "white", fontWeight: "500" }}
-                  >{`${recipes[0].aggregateLikes}`}</Text>
+                  >{`${recipes[2].aggregateLikes}`}</Text>
                   <Ionicons name="heart" size={14} color={"white"} />
                 </View>
                 <Image
@@ -116,13 +148,13 @@ export default function HomeRecipes({
           <Skeleton height={200} width={"100%"} colorMode="light" radius={14}>
             {recipes[3] && (
               <Pressable
-                onPress={() => router.push(`${recipes[3].id}`)}
+                onPress={() => handleToDetails(3)}
                 style={[{ height: 200 }, styles.customAll]}
               >
                 <View style={styles.heart}>
                   <Text
                     style={{ color: "white", fontWeight: "500" }}
-                  >{`${recipes[0].aggregateLikes}`}</Text>
+                  >{`${recipes[3].aggregateLikes}`}</Text>
                   <Ionicons name="heart" size={14} color={"white"} />
                 </View>
                 <Image
@@ -143,13 +175,13 @@ export default function HomeRecipes({
           <Skeleton height={200} width={"100%"} colorMode="light" radius={14}>
             {recipes[4] && (
               <Pressable
-                onPress={() => router.push(`${recipes[4].id}`)}
+                onPress={() => handleToDetails(4)}
                 style={[{ height: 200 }, styles.customAll]}
               >
                 <View style={styles.heart}>
                   <Text
                     style={{ color: "white", fontWeight: "500" }}
-                  >{`${recipes[0].aggregateLikes}`}</Text>
+                  >{`${recipes[4].aggregateLikes}`}</Text>
                   <Ionicons name="heart" size={14} color={"white"} />
                 </View>
                 <Image
@@ -169,13 +201,13 @@ export default function HomeRecipes({
           <Skeleton height={150} width={"100%"} colorMode="light" radius={14}>
             {recipes[5] && (
               <Pressable
-                onPress={() => router.push(`${recipes[5].id}`)}
+                onPress={() => handleToDetails(5)}
                 style={[{ height: 150 }, styles.customAll]}
               >
                 <View style={styles.heart}>
                   <Text
                     style={{ color: "white", fontWeight: "500" }}
-                  >{`${recipes[0].aggregateLikes}`}</Text>
+                  >{`${recipes[5].aggregateLikes}`}</Text>
                   <Ionicons name="heart" size={14} color={"white"} />
                 </View>
                 <Text numberOfLines={2} style={styles.recipeTitle}>
@@ -205,13 +237,13 @@ export default function HomeRecipes({
           >
             {recipes[6] && (
               <Pressable
-                onPress={() => router.push(`${recipes[6].id}`)}
+                onPress={() => handleToDetails(6)}
                 style={[{ height: 150 }, styles.customAll]}
               >
                 <View style={styles.heart}>
                   <Text
                     style={{ color: "white", fontWeight: "500" }}
-                  >{`${recipes[0].aggregateLikes}`}</Text>
+                  >{`${recipes[6].aggregateLikes}`}</Text>
                   <Ionicons name="heart" size={14} color={"white"} />
                 </View>
                 <Image
@@ -219,7 +251,7 @@ export default function HomeRecipes({
                   style={{ flex: 1, width: "100%" }}
                 />
                 <Text numberOfLines={2} style={styles.recipeTitle}>
-                  {recipes![0].title}
+                  {recipes![6].title}
                 </Text>
                 <LinearGradient
                   colors={["transparent", "rgba(0,0,0,0.8)"]}
@@ -231,13 +263,13 @@ export default function HomeRecipes({
           <Skeleton height={200} width={"100%"} colorMode="light" radius={14}>
             {recipes[7] && (
               <Pressable
-                onPress={() => router.push(`${recipes[7].id}`)}
+                onPress={() => handleToDetails(7)}
                 style={[{ height: 200 }, styles.customAll]}
               >
                 <View style={styles.heart}>
                   <Text
                     style={{ color: "white", fontWeight: "500" }}
-                  >{`${recipes[0].aggregateLikes}`}</Text>
+                  >{`${recipes[7].aggregateLikes}`}</Text>
                   <Ionicons name="heart" size={14} color={"white"} />
                 </View>
                 <Image
@@ -245,7 +277,7 @@ export default function HomeRecipes({
                   style={{ flex: 1, width: "100%" }}
                 />
                 <Text numberOfLines={2} style={styles.recipeTitle}>
-                  {recipes![1].title}
+                  {recipes![7].title}
                 </Text>
                 <LinearGradient
                   colors={["transparent", "rgba(0,0,0,0.8)"]}
@@ -257,13 +289,13 @@ export default function HomeRecipes({
           <Skeleton height={200} width={"100%"} colorMode="light" radius={14}>
             {recipes[8] && (
               <Pressable
-                onPress={() => router.push(`${recipes[8].id}`)}
+                onPress={() => handleToDetails(8)}
                 style={[{ height: 200 }, styles.customAll]}
               >
                 <View style={styles.heart}>
                   <Text
                     style={{ color: "white", fontWeight: "500" }}
-                  >{`${recipes[0].aggregateLikes}`}</Text>
+                  >{`${recipes[8].aggregateLikes}`}</Text>
                   <Ionicons name="heart" size={14} color={"white"} />
                 </View>
                 <Image
@@ -271,7 +303,7 @@ export default function HomeRecipes({
                   style={{ flex: 1, width: "100%" }}
                 />
                 <Text numberOfLines={2} style={styles.recipeTitle}>
-                  {recipes![2].title}
+                  {recipes![8].title}
                 </Text>
                 <LinearGradient
                   colors={["transparent", "rgba(0,0,0,0.8)"]}
@@ -285,13 +317,13 @@ export default function HomeRecipes({
           <Skeleton height={200} width={"100%"} colorMode="light" radius={14}>
             {recipes[9] && (
               <Pressable
-                onPress={() => router.push(`${recipes[9].id}`)}
+                onPress={() => handleToDetails(9)}
                 style={[{ height: 200 }, styles.customAll]}
               >
                 <View style={styles.heart}>
                   <Text
                     style={{ color: "white", fontWeight: "500" }}
-                  >{`${recipes[0].aggregateLikes}`}</Text>
+                  >{`${recipes[9].aggregateLikes}`}</Text>
                   <Ionicons name="heart" size={14} color={"white"} />
                 </View>
                 <Image
@@ -299,7 +331,7 @@ export default function HomeRecipes({
                   style={{ flex: 1, width: "100%" }}
                 />
                 <Text numberOfLines={2} style={styles.recipeTitle}>
-                  {recipes![3].title}
+                  {recipes![9].title}
                 </Text>
                 <LinearGradient
                   colors={["transparent", "rgba(0,0,0,0.8)"]}
@@ -308,25 +340,17 @@ export default function HomeRecipes({
               </Pressable>
             )}
           </Skeleton>
-          {/* {!reverse && (
-            <View
-              style={{
-                backgroundColor: "lightgray",
-                height: 40,
-                borderRadius: 12,
-              }}
-            ></View>
-          )} */}
+
           <Skeleton height={200} width={"100%"} colorMode="light" radius={14}>
             {recipes[10] && (
               <Pressable
-                onPress={() => router.push(`${recipes[10].id}`)}
+                onPress={() => handleToDetails(10)}
                 style={[{ height: 200 }, styles.customAll]}
               >
                 <View style={styles.heart}>
                   <Text
                     style={{ color: "white", fontWeight: "500" }}
-                  >{`${recipes[0].aggregateLikes}`}</Text>
+                  >{`${recipes[10].aggregateLikes}`}</Text>
                   <Ionicons name="heart" size={14} color={"white"} />
                 </View>
                 <Image
@@ -334,7 +358,7 @@ export default function HomeRecipes({
                   style={{ flex: 1, width: "100%" }}
                 />
                 <Text numberOfLines={2} style={styles.recipeTitle}>
-                  {recipes![4].title}
+                  {recipes![10].title}
                 </Text>
                 <LinearGradient
                   colors={["transparent", "rgba(0,0,0,0.8)"]}
@@ -346,17 +370,17 @@ export default function HomeRecipes({
           <Skeleton height={150} width={"100%"} colorMode="light" radius={14}>
             {recipes[11] && (
               <Pressable
-                onPress={() => router.push(`${recipes[11].id}`)}
+                onPress={() => handleToDetails(11)}
                 style={[{ height: 150 }, styles.customAll]}
               >
                 <View style={styles.heart}>
                   <Text
                     style={{ color: "white", fontWeight: "500" }}
-                  >{`${recipes[0].aggregateLikes}`}</Text>
+                  >{`${recipes[11].aggregateLikes}`}</Text>
                   <Ionicons name="heart" size={14} color={"white"} />
                 </View>
                 <Text numberOfLines={2} style={styles.recipeTitle}>
-                  {recipes![5].title}
+                  {recipes![11].title}
                 </Text>
                 <Image
                   source={{ uri: recipes![11].image }}
@@ -373,7 +397,7 @@ export default function HomeRecipes({
       </View>
     </View>
   );
-}
+});
 
 export function RecipeItem({ recipe }: { recipe: any }) {
   const { image, title, id, aggregateLikes } = recipe;
@@ -465,3 +489,5 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
   },
 });
+
+export default HomeRecipes;

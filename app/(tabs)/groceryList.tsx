@@ -119,6 +119,7 @@ export default function CreateList() {
                   onChangeText={(text) => setNewGroceryValue(text)}
                   returnKeyType="done"
                   onSubmitEditing={() => {
+                    if (newGroceryValue === "") return;
                     setGroceries((prev) => [
                       ...prev,
                       {
@@ -141,6 +142,7 @@ export default function CreateList() {
                     alignItems: "center",
                   }}
                   onPress={() => {
+                    if (newGroceryValue === "") return;
                     setGroceries((prev) => [
                       ...prev,
                       {
@@ -197,7 +199,7 @@ function GroceryItem({
       onPress={onCompleteGrocery}
     >
       <Text style={{ color: "white" }}>
-        {grocery.isPurchased ? "Remove" : "Done"}
+        {grocery.isPurchased ? "Undo" : "Done"}
       </Text>
       {!grocery.isPurchased && (
         <Ionicons name="checkmark-circle-outline" size={18} color={"white"} />
@@ -217,9 +219,7 @@ function GroceryItem({
         console.log("Jello Delete");
       }}
     >
-      <Text style={{ color: "white", paddingHorizontal: 20 }}>
-        {grocery.isPurchased ? "Undo" : "Delete"}
-      </Text>
+      <Text style={{ color: "white", paddingHorizontal: 20 }}>Delete</Text>
     </TouchableOpacity>
   );
   return (

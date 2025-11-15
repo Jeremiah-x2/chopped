@@ -1,10 +1,10 @@
-import { api } from "@/convex/_generated/api";
+import useCustomFetchReactQuery from "@/hooks/useCustomFetchReactQuery";
 import { FontAwesome, Ionicons } from "@expo/vector-icons";
-import { useQuery } from "convex/react";
 // import { useQuery } from "@tanstack/react-query";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useRef } from "react";
 import {
+  ActivityIndicator,
   Dimensions,
   FlatList,
   Image,
@@ -21,13 +21,22 @@ export default function RecipeDetails() {
   const router = useRouter();
   const titleContainerRef = useRef<View>(null);
 
-  const recipes = useQuery(api.recipes.getRecipeById, {
-    id: searchParams.recipeId as string,
+  const { data, isLoading, error } = useCustomFetchReactQuery({
+    baseUrl: `https://api.spoonacular.com/recipes/${searchParams.recipeId}/information`,
+    customKey: [searchParams.recipeId as string],
   });
 
-  console.log("Data", searchParams.recipeId as string, recipes);
-  if (!recipes || recipes.length === 0) return null;
-  const recipe = recipes[0];
+  if (isLoading) return <ActivityIndicator />;
+  if (error)
+    return (
+      <>
+        <View>
+          <Text>An Error Occured</Text>
+        </View>
+      </>
+    );
+
+  const recipe = (data as any).data;
 
   return (
     <>
@@ -37,31 +46,8 @@ export default function RecipeDetails() {
       >
         <View style={{ flex: 1 }}>
           <View style={{ position: "relative", width }}>
-            <View
-              style={{
-                position: "absolute",
-                width: "100%",
-                // borderWidth: 2,
-                // borderColor: "red",
-                top: 0,
-                zIndex: 2,
-                paddingHorizontal: 16,
-                paddingTop: 12,
-                flexDirection: "row",
-                justifyContent: "space-between",
-              }}
-            >
-              <Pressable
-                style={{
-                  width: 36,
-                  height: 36,
-                  justifyContent: "center",
-                  alignItems: "center",
-                  backgroundColor: "rgba(0,0,0,0.4)",
-                  borderRadius: 8,
-                }}
-                onPress={() => router.back()}
-              >
+            <View style={styles.headerAction}>
+              <Pressable style={styles.backBtn} onPress={() => router.back()}>
                 <Ionicons name="chevron-back" size={20} color={"white"} />
               </Pressable>
               <View style={styles.bookmarkHeartWrapper}>
@@ -75,54 +61,20 @@ export default function RecipeDetails() {
             </View>
             <Image
               source={{ uri: recipe?.image }}
-              style={{
-                height: height * 0.5,
-                flex: 1,
-                width: "100%",
-                borderBottomLeftRadius: 24,
-                borderBottomRightRadius: 24,
-                objectFit: "cover",
-                backgroundColor: "white",
-              }}
+              style={styles.recipeCoverImage}
               resizeMode="center"
             />
+          </View>
 
-            <View
-              style={{
-                position: "absolute",
-                width: "100%",
-                bottom: 0,
-                zIndex: 2,
-                paddingHorizontal: 32,
-                transform: [{ translateY: "50%" }],
-              }}
-            >
-              <View
-                ref={titleContainerRef}
-                style={{
-                  backgroundColor: "white",
-                  paddingHorizontal: 16,
-                  paddingVertical: 20,
-                  borderRadius: 24,
-                  gap: 16,
-                  elevation: 5,
-                }}
-              >
+          <View style={{ marginTop: 20 }}>
+            <View style={styles.titleBoxWrapper}>
+              <View ref={titleContainerRef} style={styles.titleContainer}>
                 <View>
-                  <Text
-                    style={{
-                      color: "#433232",
-                      fontWeight: "700",
-                      fontSize: 20,
-                      textAlign: "center",
-                    }}
-                  >
-                    {recipe?.title}
-                  </Text>
+                  <Text style={styles.titleText}>{recipe?.title}</Text>
                   <Text
                     style={{ textAlign: "center", color: "gray", fontSize: 14 }}
                   >
-                    {recipe?.extendedIngredients.length} Ingredients
+                    {recipe?.extendedIngredients?.length} Ingredients
                   </Text>
                 </View>
 
@@ -175,14 +127,7 @@ export default function RecipeDetails() {
                 </View>
               </View>
             </View>
-          </View>
-
-          <View
-            style={{
-              paddingTop: 90,
-            }}
-          >
-            <View style={{ gap: 16 }}>
+            <View style={{ gap: 16, marginTop: 16 }}>
               <Text
                 style={{
                   fontWeight: "700",
@@ -208,19 +153,7 @@ export default function RecipeDetails() {
                   )}
                   renderItem={({ index, item }) => (
                     <View style={{ maxWidth: 80 }}>
-                      <View
-                        key={index}
-                        style={{
-                          width: 80,
-                          height: 80,
-                          //   borderWidth: 1,
-                          borderColor: "orange",
-                          borderRadius: 12,
-                          backgroundColor: "#f5f5f5",
-
-                          elevation: 2,
-                        }}
-                      >
+                      <View key={index} style={styles.ingredientContainer}>
                         <Image
                           source={{
                             uri: `https://spoonacular.com/cdn/ingredients_250x250/${item.image}`,
@@ -263,28 +196,8 @@ export default function RecipeDetails() {
                 )}
                 renderItem={({ index, item }) => (
                   <View style={{ paddingHorizontal: 16 }}>
-                    <View
-                      key={index}
-                      style={{
-                        // width: 80,
-                        // height: 80,
-                        //   borderWidth: 1,
-                        borderColor: "orange",
-                        borderRadius: 16,
-                        backgroundColor: "#f5f5f5",
-                        // backgroundColor: "rgba(255, 154, 0, 0.1)",
-                        elevation: 2,
-                        paddingHorizontal: 16,
-                        paddingVertical: 16,
-                      }}
-                    >
-                      <Text
-                        style={{
-                          color: "orange",
-                          fontWeight: "600",
-                          marginBottom: 8,
-                        }}
-                      >
+                    <View key={index} style={styles.instructionStepContainer}>
+                      <Text style={styles.recipeStepText}>
                         Step {index + 1}
                       </Text>
 
@@ -305,9 +218,6 @@ export default function RecipeDetails() {
 
 const styles = StyleSheet.create({
   heart: {
-    // position: "absolute",
-    // top: 4,
-    // right: 4,
     backgroundColor: "orange",
     padding: 2,
     borderRadius: 100,
@@ -323,4 +233,74 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   bookmarkHeartWrapper: { flexDirection: "row", alignItems: "center" },
+  instructionStepContainer: {
+    borderColor: "orange",
+    borderRadius: 16,
+    backgroundColor: "#f5f5f5",
+    elevation: 2,
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+  },
+  recipeStepText: {
+    color: "orange",
+    fontWeight: "600",
+    marginBottom: 8,
+  },
+  ingredientContainer: {
+    width: 80,
+    height: 80,
+    borderColor: "orange",
+    borderRadius: 12,
+    backgroundColor: "#f5f5f5",
+    elevation: 2,
+  },
+  recipeCoverImage: {
+    height: height * 0.5,
+    flex: 1,
+    width: "100%",
+    borderBottomLeftRadius: 24,
+    borderBottomRightRadius: 24,
+    objectFit: "cover",
+    backgroundColor: "white",
+  },
+  titleContainer: {
+    backgroundColor: "white",
+    paddingHorizontal: 16,
+    paddingVertical: 20,
+    borderRadius: 24,
+    gap: 16,
+    elevation: 5,
+  },
+  titleBoxWrapper: {
+    // position: "absolute",
+    width: "100%",
+    bottom: 0,
+    zIndex: 2,
+    paddingHorizontal: 32,
+    // transform: [{ translateY: "50%" }],
+  },
+  titleText: {
+    color: "#433232",
+    fontWeight: "700",
+    fontSize: 20,
+    textAlign: "center",
+  },
+  backBtn: {
+    width: 36,
+    height: 36,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.4)",
+    borderRadius: 8,
+  },
+  headerAction: {
+    position: "absolute",
+    width: "100%",
+    top: 0,
+    zIndex: 2,
+    paddingHorizontal: 16,
+    paddingTop: 12,
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
 });

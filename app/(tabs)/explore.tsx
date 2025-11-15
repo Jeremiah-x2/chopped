@@ -1,9 +1,10 @@
-import { RecipeItem } from "@/components/HomeRecipes";
+// import { RecipeItem } from "@/components/HomeRecipes";
 import { api } from "@/convex/_generated/api";
 import { usePaginatedQuery } from "convex/react";
 import { Skeleton } from "moti/skeleton";
 import React, { useCallback } from "react";
 import { ActivityIndicator, FlatList, Text, View } from "react-native";
+import { RecipeItem } from "../searchQuery";
 
 export default function Explore() {
   const {

@@ -1,14 +1,20 @@
 import HomeHeroCarousel from "@/components/HomeHeroCarousel";
-import HomeRecipes from "@/components/HomeRecipes";
 import { FontAwesome5 } from "@expo/vector-icons";
 import { useRouter } from "expo-router";
-import React, { useContext, useEffect, useRef } from "react";
+import React, {
+  useCallback,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import {
   Alert,
   Dimensions,
   FlatList,
   Image,
   Pressable,
+  RefreshControl,
   ScrollView,
   StyleSheet,
   Text,
@@ -24,7 +30,10 @@ import {
   useSharedValue,
 } from "react-native-reanimated";
 
+import HomeRecipes, { HomeRecipesRef } from "@/components/HomeRecipes";
+import useCustomFetchReactQuery from "@/hooks/useCustomFetchReactQuery";
 import { GOOGLE_AD_ANDROID_UNIT_ID } from "@/utils/constants";
+import { useQueryClient } from "@tanstack/react-query";
 import Carousel, {
   ICarouselInstance,
   Pagination,
@@ -39,6 +48,23 @@ export default function Home() {
   const router = useRouter();
   const rewardedAdRef = useRef<RewardedAd | null>(null);
   const { points, setPoints } = useContext<IPoints>(UserPointsContext);
+  const [refreshing, setRefreshing] = useState<boolean>(false);
+  const homeRecipesRef = useRef<HomeRecipesRef>(null);
+  const query = useQueryClient();
+
+  const {
+    data: carouselRecipes,
+    isLoading: carouselLoading,
+    error: carouselError,
+    refetch,
+  } = useCustomFetchReactQuery({
+    customKey: "home-carousel-recipes",
+    query: { number: "8" },
+  });
+
+  if (carouselRecipes) {
+    console.log("Carousel Fetch Recipes", carouselRecipes);
+  }
 
   const mealCategories = [
     {
@@ -143,8 +169,20 @@ export default function Home() {
     }
   };
 
+  const onRefresh = useCallback(async () => {
+    setRefreshing(true);
+    refetch();
+    homeRecipesRef.current?.refetch();
+    setRefreshing(false);
+  }, []);
+
   return (
-    <ScrollView style={{ flex: 1, backgroundColor: "white" }}>
+    <ScrollView
+      style={{ flex: 1, backgroundColor: "white" }}
+      refreshControl={
+        <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+      }
+    >
       <View style={styles.container}>
         <View
           style={{
@@ -300,7 +338,11 @@ export default function Home() {
         </View>
 
         <View style={{ marginTop: 24, gap: 12 }}>
-          <HomeHeroCarousel />
+          <HomeHeroCarousel
+            error={carouselError}
+            isLoading={carouselLoading}
+            recipes={carouselRecipes as any}
+          />
         </View>
 
         <View style={{ marginTop: 24, gap: 12 }}>
@@ -308,7 +350,7 @@ export default function Home() {
             Recipes
           </Text>
           <View style={{ paddingHorizontal: 16, gap: 12 }}>
-            <HomeRecipes />
+            <HomeRecipes ref={homeRecipesRef} />
           </View>
         </View>
       </View>

@@ -25,9 +25,7 @@ export default function TabBar({
     search: (props: any) => (
       <Ionicons name="search" size={20} color={"gray"} {...props} />
     ),
-    // bookmarks: (props: any) => (
-    //   <Ionicons name="bookmark-outline" size={20} color={"gray"} {...props} />
-    // ),
+
     groceryList: (props: any) => (
       <>
         {
@@ -82,6 +80,7 @@ export default function TabBar({
             style={styles.tabBarItem}
           >
             {icons[route.name]({ color: isFocused ? "orange" : "gray" })}
+
             <Text
               style={{
                 color: isFocused ? "orange" : "gray",
